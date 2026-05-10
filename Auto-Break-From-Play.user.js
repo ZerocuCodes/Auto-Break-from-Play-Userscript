@@ -725,7 +725,7 @@
 #auto-bip-ui {
   position: fixed;
   top: 100px;
-  right: 360px;
+  left: 20px;
   background: linear-gradient(145deg, #1f2937, #111827);
   padding: 14px;
   border-radius: 12px;
@@ -747,6 +747,8 @@
   align-items: center;
   margin-bottom: 12px;
   cursor: move;
+  padding: 14px 10px;
+  touch-action: none;
   padding-bottom: 8px;
   border-bottom: 1px solid #374151;
   text-shadow: 0 1px 3px rgba(0,0,0,0.5);
@@ -1160,48 +1162,63 @@
 <div id="abip-debug-panel" style="${settings.debugMode ? "" : "display:none;"}"></div>
 `;
 
-    document.body.appendChild(panel);
-    makeDraggable(panel);
+    const handle = document.getElementById("abip-header");
+    makePanelDraggable(panel, handle);
     initializeEventListeners();
     updateUI();
   }
 
-  function makeDraggable(panel) {
-    const header = panel.querySelector("#abip-header");
-    let isDragging = false;
-    let xOffset = 0;
-    let yOffset = 0;
+  function makePanelDraggable(panel, handle) {
+    let startX = 0, startY = 0, initialX = 0, initialY = 0, dragging = false;
 
-    header.addEventListener("mousedown", (e) => {
-      if (e.target.closest("button, input, select, label")) return;
-      isDragging = true;
+    const startDrag = (e) => {
+      dragging = true;
+      const point = e.touches ? e.touches[0] : e;
+      startX = point.clientX;
+      startY = point.clientY;
+
       const rect = panel.getBoundingClientRect();
-      xOffset = e.clientX - rect.left;
-      yOffset = e.clientY - rect.top;
-      panel.style.cursor = "grabbing";
-    });
+      initialX = rect.left;
+      initialY = rect.top;
 
-    document.addEventListener("mousemove", (e) => {
-      if (!isDragging) return;
-      panel.style.left = `${e.clientX - xOffset}px`;
-      panel.style.top = `${e.clientY - yOffset}px`;
-      panel.style.right = "auto";
-    });
+      e.preventDefault();
+    };
 
-    document.addEventListener("mouseup", () => {
-      if (!isDragging) return;
-      isDragging = false;
-      panel.style.cursor = "default";
+    const duringDrag = (e) => {
+      if (!dragging) return;
+      const point = e.touches ? e.touches[0] : e;
+
+      const dx = point.clientX - startX;
+      const dy = point.clientY - startY;
+
+      panel.style.left = `${clamp(initialX + dx, 0, window.innerWidth - panel.offsetWidth)}px`;
+      panel.style.top = `${clamp(initialY + dy, 0, window.innerHeight - panel.offsetHeight)}px`;
+    };
+
+    const endDrag = () => {
+      dragging = false;
       const rect = panel.getBoundingClientRect();
       settings.uiPosition = { top: rect.top, left: rect.left };
       saveSettings();
-    });
+    };
+
+    handle.addEventListener("mousedown", startDrag);
+    handle.addEventListener("touchstart", startDrag, { passive: false });
+
+    window.addEventListener("mousemove", duringDrag);
+    window.addEventListener("touchmove", duringDrag, { passive: false });
+
+    window.addEventListener("mouseup", endDrag);
+    window.addEventListener("touchend", endDrag);
 
     if (settings.uiPosition) {
       panel.style.top = `${settings.uiPosition.top}px`;
       panel.style.left = `${settings.uiPosition.left}px`;
-      panel.style.right = "auto";
     }
+  }
+
+  function clamp(val, min, max) {
+    return Math.max(min, Math.min(max, val));
   }
 
   function initializeEventListeners() {
