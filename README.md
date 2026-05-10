@@ -7,7 +7,7 @@
 - Once triggered, your account will be locked from all gambling activities
 - No manual override, customer support intervention, or cancellation is possible
 - The break will remain active for the full duration you select (1 day, 1 week, or 1 month)
-- You will lose access to all betting, casino games, and stake.com features during this period
+- You will lose access to all betting, casino games, and stake.com features during this period with the exception of withdrawals and claiming promo codes.
 - **THERE IS NO WAY TO UNDO OR SHORTEN A BREAK IN PLAY ONCE STARTED**
 
 ## Overview
