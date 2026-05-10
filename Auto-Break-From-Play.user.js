@@ -1162,6 +1162,7 @@
 <div id="abip-debug-panel" style="${settings.debugMode ? "" : "display:none;"}"></div>
 `;
 
+    document.body.appendChild(panel);
     const handle = document.getElementById("abip-header");
     makePanelDraggable(panel, handle);
     initializeEventListeners();
